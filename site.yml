@@ -39,6 +39,7 @@
       user:
         name: ansible
         groups: deploy
+      check_mode: yes
     - name: 'rbenvディレクトリの所有グループをdeployに変更'
       file:
         path: /usr/local/rbenv
@@ -46,6 +47,7 @@
         group: deploy
         state: directory
         recurse: yes
+      check_mode: yes
     - name: 'rubyインストール'
       shell: bash -lc "rbenv install --skip-existing 2.5.0"
     - name: 'globalセット'
@@ -55,3 +57,4 @@
         name: bundler
         user_install: no
         executable: /usr/local/rbenv/shims/gem
+      check_mode: yes
