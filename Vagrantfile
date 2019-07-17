@@ -10,6 +10,7 @@ Vagrant.configure(2) do |config|
     node.vm.box = "mvbcoding/awslinux"
     node.vm.network :forwarded_port, guest: 22, host: 2001, id: "ssh"
     node.vm.network :private_network, ip: "192.168.33.11"
+    node.vm.synced_folder '.', '/home/vagrant/ansible-ruby', disabled: false
   end
 
   config.vm.define :server_1 do |node|
