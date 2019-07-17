@@ -17,10 +17,16 @@
         - readline-devel
         - zlib-devel
         - libffi-devel
+    - name: 'check exist git command'
+      shell: git --version
+      register: git_version
+      ignore_errors: yes
+      check_mode: no
     - name: 'rbenvインストール'
       git:
         repo: https://github.com/sstephenson/rbenv.git
         dest: /usr/local/rbenv
+      when: 'git_version is success'
     - name: 'rbenvのshファイルを配置'
       template:
         src: rbenv_system.sh.j2
@@ -32,29 +38,41 @@
       git:
         repo: https://github.com/sstephenson/ruby-build.git
         dest: /usr/local/rbenv/plugins/ruby-build
+      when: 'git_version is success'
     - name: 'deploy用のグループを作成'
       group:
         name: deploy
+    - name: 'check exists group'
+      shell: getent group deploy
+      register: group_exists
+      ignore_errors: yes
+      check_mode: no
     - name: 'ansibleユーザーをdeployグループに所属'
       user:
         name: ansible
         groups: deploy
-      check_mode: yes
+      when: 'group_exists is success'
     - name: 'rbenvディレクトリの所有グループをdeployに変更'
       file:
         path: /usr/local/rbenv
         owner: root
         group: deploy
         state: directory
+        mode: 2775
         recurse: yes
-      check_mode: yes
     - name: 'rubyインストール'
       shell: bash -lc "rbenv install --skip-existing 2.5.0"
     - name: 'globalセット'
       shell: bash -lc "rbenv global 2.5.0"
+    - name: 'check exists gem'
+      shell: gem -v
+      register: gem_exists
+      ignore_errors: yes
+      check_mode: no
+      become: no
     - name: 'bundlerインストール'
       gem:
         name: bundler
         user_install: no
         executable: /usr/local/rbenv/shims/gem
-      check_mode: yes
+      when: 'gem_exists is success'
